@@ -22,8 +22,11 @@ initCronJobs();
 //   credentials: true
 // }));
 
+// app.use(cors({
+//   origin: "*"
+// }));
 app.use(cors({
-  origin: "*"
+  origin: "http://localhost:5173"
 }));
 
 app.get("/", (req, res) => {
