@@ -33,7 +33,9 @@ initCronJobs();
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    "https://primegift-9vrd.vercel.app"
+    "https://primegift-9vrd.vercel.app",
+    "https://www.primegift.in",
+    "https://primegift.in"
   ],
   credentials: true
 }));
