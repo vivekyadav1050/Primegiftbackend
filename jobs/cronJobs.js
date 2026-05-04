@@ -64,7 +64,7 @@ const discountMap = {
   "birkenstock": 9,
   "black plus decker": 3.5,
   "blaupunkt": 8,
-  "blinkit": 1.25,
+  "Blinkit Coupon": 1.25,
   "blissclub": 11,
   "blue tokai": 12,
   "boat": 6,
