@@ -67,7 +67,7 @@ export const register = async (req, res) => {
 
     // send email
     await resend.emails.send({
-      from: "PrimeGift noreply@primegift.in>",
+      from: "PrimeGift <noreply@primegift.in>",
       to: email,
       subject: "Verify your email",
       html: `<h2>Your OTP is: ${otp}</h2>`
@@ -186,7 +186,7 @@ export const resendOtp = async (req, res) => {
     });
 
     await resend.emails.send({
-      from: "PrimeGift noreply@primegift.in>",
+      from: "PrimeGift <noreply@primegift.in>",
       to: email,
       subject: "Resend OTP",
       html: `<h2>Your OTP is: ${otp}</h2>`
