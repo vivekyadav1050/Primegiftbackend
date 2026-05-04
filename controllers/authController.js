@@ -9,7 +9,6 @@ const SECRETKEY=process.env.APP_SECRET_KEY;
 
 // ================= REGISTER =================
 export const register = async (req, res) => {
-  console.log("API HIT");
 
   try {
     const { name, email, password } = req.body;
@@ -65,23 +64,46 @@ export const register = async (req, res) => {
 
     await existingUser.save();
 
-    // send email
-    await resend.emails.send({
-      from: "PrimeGift <noreply@primegift.in>",
-      to: email,
-      subject: "Verify your email",
-      html: `<h2>Your OTP is: ${otp}</h2>`
-    });
+let emailResponse;
 
-    return res.status(200).json({
-      message: "OTP sent to your email"
-    });
+try {
+  emailResponse = await resend.emails.send({
+    from: "PrimeGift <noreply@primegift.in>",
+    to: email,
+    subject: "Verify your email",
+    html: `<h2>Your OTP is: ${otp}</h2>`
+  });
+
+
+} catch (emailError) {
+
+  return res.status(500).json({
+    success: false,
+    message: "Failed to send OTP email"
+  });
+}
+
+// ✅ FIX: correct response check
+if (!emailResponse || !emailResponse.data || !emailResponse.data.id) {
+  return res.status(500).json({
+    success: false,
+    message: "Failed to send OTP. Please try again."
+  });
+}
+
+return res.status(200).json({
+  success: true,
+  message: "OTP sent to your email"
+});
+
 
   } catch (err) {
     return res.status(500).json({
       error: err.message
     });
   }
+
+
 };
 
 
@@ -90,7 +112,6 @@ export const verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
 
-    console.log("verify api hit");
 
     if (!email || !otp) {
       return res.status(400).json({
@@ -150,7 +171,6 @@ export const resendOtp = async (req, res) => {
   try {
     const { email } = req.body;
 
-    console.log("resend api hit");
 
     if (!email) {
       return res.status(400).json({
@@ -185,16 +205,36 @@ export const resendOtp = async (req, res) => {
       expiresAt
     });
 
-    await resend.emails.send({
-      from: "PrimeGift <noreply@primegift.in>",
-      to: email,
-      subject: "Resend OTP",
-      html: `<h2>Your OTP is: ${otp}</h2>`
-    });
+let emailResponse;
 
-    return res.status(200).json({
-      message: "OTP resent successfully"
-    });
+try {
+  emailResponse = await resend.emails.send({
+    from: "PrimeGift <noreply@primegift.in>",
+    to: email,
+    subject: "Resend OTP",
+    html: `<h2>Your OTP is: ${otp}</h2>`
+  });
+
+} catch (error) {
+
+  return res.status(500).json({
+    success: false,
+    message: "Failed to resend OTP"
+  });
+}
+
+// ✅ check resend response properly
+if (!emailResponse || !emailResponse.data || !emailResponse.data.id) {
+  return res.status(500).json({
+    success: false,
+    message: "Failed to resend OTP. Try again."
+  });
+}
+
+return res.status(200).json({
+  success: true,
+  message: "OTP resent successfully"
+});
 
   } catch (err) {
     return res.status(500).json({
