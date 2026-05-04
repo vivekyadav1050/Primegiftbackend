@@ -33,19 +33,20 @@ const brandSchema = new mongoose.Schema(
 
     tncUrl: String,
 
-    // ✅ UI data
     termsAndConditions: {
       type: [String],
       default: []
     },
 
+    // ✅ structured instructions
     usageInstructions: {
-      type: mongoose.Schema.Types.Mixed,
-      default: {}
+      ONLINE: { type: [String], default: [] },
+      OFFLINE: { type: [String], default: [] }
     },
 
-    howToUse: {
-      type: mongoose.Schema.Types.Mixed,
+    // ✅ API structured format
+    howToUseInstructions: {
+      type: [mongoose.Schema.Types.Mixed],
       default: []
     },
 
@@ -59,13 +60,13 @@ const brandSchema = new mongoose.Schema(
 
     tags: { type: [String], default: [] },
 
-    // 🔥 DISCOUNT
     discountPercent: {
       type: Number,
-      default: 0
+      default: 0,
+      min: 0,
+      max: 100
     },
 
-    // 🔥 PROFIT CONTROL
     costPricePercent: {
       type: Number,
       default: 100,
@@ -73,29 +74,17 @@ const brandSchema = new mongoose.Schema(
       max: 100
     }
   },
-  {
-    timestamps: true
-  }
+  { timestamps: true }
 );
 
-
-// INDEXES (VERY IMPORTANT)
-
-// 🔥 Hybrid search support (text ranking)
+// INDEXES
 brandSchema.index({
   name: "text",
   description: "text",
   tags: "text"
 });
 
-// 🔥 Fast regex search
-brandSchema.index({ name: 1 });
-
-// 🔥 Query optimization (filtering)
 brandSchema.index({ status: 1, category: 1 });
-
-// 🔥 Optional: sort optimization
-brandSchema.index({ name: 1, status: 1 });
-
+brandSchema.index({ brandId: 1, status: 1 });
 
 export default mongoose.model("Brand", brandSchema);

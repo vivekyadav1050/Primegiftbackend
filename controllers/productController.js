@@ -99,9 +99,44 @@ export const getProductById = async (req, res) => {
       return res.status(404).json({ success: false });
     }
 
-    res.json({ success: true, data: product });
+    let howToUse = [];
 
-  } catch {
+    // ✅ Priority 1: structured API format
+    if (product.howToUseInstructions?.length) {
+      howToUse = product.howToUseInstructions.map(item => ({
+        retailModeName:
+          item.retailModeName?.toUpperCase() || item.retailMode,
+        instructions: item.instructions || []
+      }));
+    }
+
+    // ✅ Priority 2: fallback format
+    else if (product.usageInstructions) {
+      if (product.usageInstructions.ONLINE?.length) {
+        howToUse.push({
+          retailModeName: "ONLINE",
+          instructions: product.usageInstructions.ONLINE
+        });
+      }
+
+      if (product.usageInstructions.OFFLINE?.length) {
+        howToUse.push({
+          retailModeName: "OFFLINE",
+          instructions: product.usageInstructions.OFFLINE
+        });
+      }
+    }
+
+    // ✅ Final response
+    res.json({
+      success: true,
+      data: {
+        ...product.toObject(),
+        howToUse // 🔥 always consistent
+      }
+    });
+
+  } catch (err) {
     res.status(500).json({ success: false });
   }
 };

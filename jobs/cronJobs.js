@@ -40,6 +40,7 @@ cron.schedule("*/15 * * * *", async () => {
   });
 
   // 🔄 HUBBLE SYNC
+
 cron.schedule("0 */12 * * *", async () => {
     try {
       const token = await getValidToken();
@@ -59,26 +60,58 @@ cron.schedule("0 */12 * * *", async () => {
 
       const activeProducts = products.filter(p => p.status === "ACTIVE");
 
-      const formatted = activeProducts.map((p) => {
+      // const formatted = activeProducts.map((p) => {
+      //   const discountPercent = discountMap[normalize(p.title)] || 0;
+
+      //   return {
+      //     brandId: p.id,
+      //     name: p.title.trim(),
+      //     image: p.thumbnailUrl,
+      //     logo: p.logoUrl,
+      //     status: p.status,
+      //     denominationType: p.denominationType,
+      //     redemptionType: p.redemptionType,
+      //     minAmount: p.amountRestrictions?.minAmount || 0,
+      //     maxAmount: p.amountRestrictions?.maxAmount || 0,
+      //     denominations: p.amountRestrictions?.denominations || [],
+      //     category: p.category || [],
+      //     tags: p.tags || [],
+      //     discountPercent
+      //   };
+      // });
+
+        const formatted = activeProducts.map((p) => {
         const discountPercent = discountMap[normalize(p.title)] || 0;
 
         return {
           brandId: p.id,
           name: p.title.trim(),
+          description: p.brandDescription || "",
+
           image: p.thumbnailUrl,
           logo: p.logoUrl,
+
           status: p.status,
           denominationType: p.denominationType,
           redemptionType: p.redemptionType,
+
           minAmount: p.amountRestrictions?.minAmount || 0,
           maxAmount: p.amountRestrictions?.maxAmount || 0,
           denominations: p.amountRestrictions?.denominations || [],
+
           category: p.category || [],
           tags: p.tags || [],
-          discountPercent
+          discountPercent,
+
+          // 🔥 CRITICAL FIELDS
+          usageInstructions: p.usageInstructions || {},
+          howToUseInstructions: p.howToUseInstructions || [],
+          termsAndConditions: p.termsAndConditions || [],
+          tncUrl: p.tncUrl || "",
+          voucherExpiryInMonths: p.voucherExpiryInMonths || null
         };
       });
-
+      
       const apiBrandIds = formatted.map(p => p.brandId);
 
       await Brand.bulkWrite(
