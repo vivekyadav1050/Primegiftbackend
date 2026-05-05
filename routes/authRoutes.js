@@ -4,6 +4,7 @@ import { otpLimiter, loginLimiter, registerLimiter } from "../middleware/rateLim
 
 const router = express.Router();
 
+
 router.post("/register", registerLimiter, register);
 router.post("/verify-otp", verifyOtp);
 router.post("/resend-otp", otpLimiter, resendOtp);

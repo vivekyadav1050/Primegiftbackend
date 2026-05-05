@@ -138,7 +138,7 @@ export const verifyPayment = async (req, res) => {
         recipientType: "SELF",
         recipientPhoneNumber: "9999999999",
         senderName: "PrimeGift",
-        wishMessage: "Enjoy your gift 🎁"
+        wishMessage: "Enjoy your gift "
       }
     };
 
@@ -444,3 +444,4 @@ export const getMyOrders = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+

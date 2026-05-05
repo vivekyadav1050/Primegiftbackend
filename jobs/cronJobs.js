@@ -3,6 +3,7 @@ import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 import Brand from "../models/Brand.js";
 import User from "../models/User.js";
+import Order from "../models/Order.js";
 import { getValidToken } from "../services/hubbleService.js";
 
 
@@ -370,6 +371,51 @@ console.error("❌ Cron Error:",
   );
     }
 });
+
+
+cron.schedule("0 * * * *", async () => {
+  try {
+    console.log("⏳ Running 12h cleanup...");
+
+    const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
+
+    const result = await Order.updateMany(
+      {
+        status: "CREATED",
+        "payment.paymentStatus": "PENDING",
+        createdAt: { $lt: twelveHoursAgo }
+      },
+      {
+        $set: {
+          status: "CANCELLED",
+          failureReason: "Payment timeout (12h)"
+        }
+      }
+    );
+
+    console.log(`🧹 Cancelled ${result.modifiedCount} stale orders`);
+
+  } catch (err) {
+    console.error("❌ Cron error:", err.message);
+  }
+});
+
+cron.schedule("0 2 * * *", async () => { // daily at 2 AM
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+  await Order.deleteMany({
+    status: "CANCELLED",
+    createdAt: { $lt: sevenDaysAgo }
+  });
+
+  console.log("🗑 Old cancelled orders deleted");
+});
+
+
+
+
+
+
 
 
 };
