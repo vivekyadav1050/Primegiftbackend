@@ -1,6 +1,7 @@
 import Brand from "../models/Brand.js";
 import Order from "../models/Order.js";
 import Voucher from "../models/Voucher.js";
+import User from "../models/User.js";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 import axios from "axios";
@@ -10,10 +11,74 @@ import { BASE_URL } from "../services/hubbleService.js";
 
 const toPaise = (r) => Math.round(Number(r) * 100);
 
+// export const createOrder = async (req, res) => {
+//   try {
+//     const userId = req.user.id;
+//     const { brandId, amount, paymentMethod, payingAmount } = req.body;
+//     console.log("Creating order with data:", req.body);
+
+//     const brand = await Brand.findOne({ brandId });
+
+//     const voucherPaise = toPaise(amount);
+
+//     let discountPercent = brand.discountPercent || 0;
+
+//     const discountPaise = Math.floor((voucherPaise * discountPercent) / 100);
+//     const payablePaise = voucherPaise - discountPaise;
+
+//     const order = await Order.create({
+//       userId,
+//       items: [{
+//         brandId,
+//         brandName: brand.name,
+//         amount: voucherPaise,
+//         quantity: 1
+//       }],
+//       totalAmount: payablePaise,
+//       status: "CREATED",
+//       payment: {
+//         method: paymentMethod,
+//         paymentStatus: "PENDING",
+//         discountAmount: discountPaise,
+//         discountPercent,
+//         finalAmount: payablePaise,
+//         originalAmount: voucherPaise
+//       }
+//     });
+
+
+//     const razorpay = new Razorpay({
+//       key_id: process.env.KEY_ID,
+//       key_secret: process.env.KEY_SECRET,
+//     });
+
+//     const razorpayOrder = await razorpay.orders.create({
+//       amount: payablePaise,
+//       currency: "INR",
+//       receipt: `order_${order._id}`
+//     });
+
+//     order.payment.razorpayOrderId = razorpayOrder.id;
+//     await order.save();
+
+//     res.json({
+//       orderId: order._id,
+//       razorpayOrderId: razorpayOrder.id,
+//       amount: razorpayOrder.amount
+//     });
+
+//   } catch {
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
+
+
 export const createOrder = async (req, res) => {
   try {
     const userId = req.user.id;
     const { brandId, amount, paymentMethod, payingAmount } = req.body;
+
+    console.log("Creating order with data:", req.body);
 
     const brand = await Brand.findOne({ brandId });
 
@@ -21,8 +86,43 @@ export const createOrder = async (req, res) => {
 
     let discountPercent = brand.discountPercent || 0;
 
-    const discountPaise = Math.floor((voucherPaise * discountPercent) / 100);
+    const discountPaise = Math.floor(
+      (voucherPaise * discountPercent) / 100
+    );
+
     const payablePaise = voucherPaise - discountPaise;
+
+    // =========================
+    // CHECK HUBBLE WALLET BALANCE
+    // =========================
+
+    const token = await getValidToken();
+
+   const walletResponse = await axios.get(
+  `${BASE_URL}/v1/partners/wallet/balance`,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "x-request-id": uuidv4(),
+    },
+  }
+);
+
+    const walletBalance = Number(
+      walletResponse.data.balance || 0
+    );
+
+    const walletBalancePaise = Math.round(
+      walletBalance * 100
+    );
+
+    // FULL voucher amount check
+    if (walletBalancePaise < voucherPaise) {
+      return res.status(400).json({
+        success: false,
+        message: "We are working on it . Please wait it will be available soon."
+      });
+    }
 
     const order = await Order.create({
       userId,
@@ -56,6 +156,7 @@ export const createOrder = async (req, res) => {
     });
 
     order.payment.razorpayOrderId = razorpayOrder.id;
+
     await order.save();
 
     res.json({
@@ -64,8 +165,14 @@ export const createOrder = async (req, res) => {
       amount: razorpayOrder.amount
     });
 
-  } catch {
-    res.status(500).json({ message: "Server error" });
+  } catch (error) {
+
+    console.log(error.response?.data || error.message);
+
+    res.status(500).json({
+      message: "Server error"
+    });
+
   }
 };
 
@@ -87,7 +194,6 @@ export const verifyPayment = async (req, res) => {
     if (expectedSignature !== razorpay_signature) {
       return res.status(400).json({ success: false, message: "Invalid signature" });
     }
-
     const order = await Order.findOne({
       "payment.razorpayOrderId": razorpay_order_id
     });
@@ -121,28 +227,54 @@ export const verifyPayment = async (req, res) => {
     order.payment.transactionId = razorpay_payment_id;
     await order.save();
 
+
+    // const payload = {
+    //   productId: order.items[0].brandId,
+    //   referenceId: order._id.toString(),
+    //   amount: order.items[0].amount / 100,
+    //   denominationDetails: [
+    //     { denomination: order.items[0].amount / 100, quantity: 1 }
+    //   ],
+    //   customerDetails: {
+    //     name: "User",
+    //     phoneNumber: "9999999999",
+    //     email: "test@gmail.com"
+    //   },
+    //   deliveryDetails: {
+    //     recipientName: "User",
+    //     recipientType: "SELF",
+    //     recipientPhoneNumber: "9999999999",
+    //     senderName: "PrimeGift",
+    //     wishMessage: "Enjoy your gift "
+    //   }
+    // };
+
+
     const payload = {
-      productId: order.items[0].brandId,
-      referenceId: order._id.toString(),
-      amount: order.items[0].amount / 100,
-      denominationDetails: [
-        { denomination: order.items[0].amount / 100, quantity: 1 }
-      ],
-      customerDetails: {
-        name: "User",
-        phoneNumber: "9999999999",
-        email: "test@gmail.com"
-      },
-      deliveryDetails: {
-        recipientName: "User",
-        recipientType: "SELF",
-        recipientPhoneNumber: "9999999999",
-        senderName: "PrimeGift",
-        wishMessage: "Enjoy your gift "
-      }
-    };
+  productId: order.items[0].brandId,
+
+  referenceId: order._id.toString(),
+
+  amount: order.items[0].amount / 100,
+
+  denominationDetails: [
+    {
+      denomination: order.items[0].amount / 100,
+      quantity: 1
+    }
+  ],
+
+  customerDetails: {
+    name: "primegift user",
+    phoneNumber: req.user.phone,
+    email: "no-reply@primegift.in"
+  }
+};
 
     const token = await getValidToken();
+
+
+
 
   const hubbleRes = await axios.post(
     `${BASE_URL}/v1/partners/orders`,
@@ -154,6 +286,8 @@ export const verifyPayment = async (req, res) => {
       }
     }
 );
+
+
 
     const hubbleStatus = hubbleRes.data?.status;
 
@@ -245,10 +379,13 @@ export const verifyPayment = async (req, res) => {
     return res.json({ success: false, status: hubbleStatus || "UNKNOWN" });
 
   } catch (err) {
+ 
+
     await Order.updateOne(
       { "payment.razorpayOrderId": req.body.razorpay_order_id },
       { status: "FAILED" }
     );
+
 
     return res.status(500).json({
       success: false,
