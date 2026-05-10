@@ -8,6 +8,7 @@ import axios from "axios";
 import { getValidToken } from "../services/hubbleService.js";
 import { v4 as uuidv4 } from "uuid";
 import { BASE_URL } from "../services/hubbleService.js";
+import resend from "../services/emailService.js";
 
 const toPaise = (r) => Math.round(Number(r) * 100);
 
@@ -119,14 +120,30 @@ export const createOrder = async (req, res) => {
     // FULL voucher amount check
     if (walletBalancePaise < voucherPaise) {
 
+        try {
+                  await resend.emails.send({
+                    from: "PrimeGift <noreply@primegift.in>",
+                    to: "vivekdrivelpu@gmail.com",
+                    subject: "Low Wallet Balance Alert",
+                    html: `
+                      <h2>Wallet Balance Low</h2>
 
+                      <p>Someone tried to purchase a voucher but wallet balance is low.</p>
 
+                      <p><strong>Voucher Amount:</strong> ₹${voucherPaise / 100}</p>
+                      <p><strong>Wallet Balance:</strong> ₹${walletBalancePaise / 100}</p>
+                    `
+                  });
+                } 
+                catch (err) {
+                  console.log("Email failed:", err.message);
+}
       
-      return res.status(400).json({
-        success: false,
-        message: "We are working on it . Please wait it will be available soon."
-      });
-    }
+          return res.status(400).json({
+            success: false,
+            message: "We are working on it . Please wait it will be available soon."
+          });
+        }
 
     const order = await Order.create({
       userId,
