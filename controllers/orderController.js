@@ -118,6 +118,10 @@ export const createOrder = async (req, res) => {
 
     // FULL voucher amount check
     if (walletBalancePaise < voucherPaise) {
+
+
+
+      
       return res.status(400).json({
         success: false,
         message: "We are working on it . Please wait it will be available soon."

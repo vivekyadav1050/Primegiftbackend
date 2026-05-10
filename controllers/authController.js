@@ -174,7 +174,6 @@ export const register = async (req, res) => {
       `${process.env.TWO_FACTOR_BASE_URL}/${process.env.TWO_FACTOR_API_KEY}/SMS/+91${phone}/AUTOGEN/OTP1`
     );
 
-    console.log(response.data);
 
     if (response.data.Status !== "Success") {
       return res.status(500).json({
@@ -552,6 +551,143 @@ export const login = async (req, res) => {
   } catch (err) {
 
     console.log(err);
+
+    return res.status(500).json({
+      success: false,
+      error: err.message
+    });
+  }
+};
+
+
+//forget password and reset password can be implemented similarly by sending OTP to phone and verifying it with 2factor.in before allowing password reset.
+export const forgotPasswordSendOtp = async (req, res) => {
+
+  try {
+
+    const { phone } = req.body;
+
+    if (!phone) {
+      return res.status(400).json({
+        message: "Phone number required"
+      });
+    }
+
+    const user = await User.findOne({ phone });
+
+    if (!user) {
+      return res.status(400).json({
+        message: "User not found"
+      });
+    }
+
+    const response = await axios.get(
+      `${process.env.TWO_FACTOR_BASE_URL}/${process.env.TWO_FACTOR_API_KEY}/SMS/+91${phone}/AUTOGEN/OTP1`
+    );
+
+    if (response.data.Status !== "Success") {
+      return res.status(400).json({
+        message: "Failed to send OTP"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      sessionId: response.data.Details,
+      message: "OTP sent successfully"
+    });
+
+  } catch (err) {
+
+    return res.status(500).json({
+      success: false,
+      error: err.message
+    });
+  }
+};
+
+
+//verify OTP for forgot password and return reset token
+export const forgotPasswordVerifyOtp = async (req, res) => {
+
+  try {
+
+    const { phone, otp, sessionId } = req.body;
+
+    const response = await axios.get(
+      `${process.env.TWO_FACTOR_BASE_URL}/${process.env.TWO_FACTOR_API_KEY}/SMS/VERIFY/${sessionId}/${otp}`
+    );
+
+    if (response.data.Status !== "Success") {
+      return res.status(400).json({
+        message: "Invalid OTP"
+      });
+    }
+
+    // reset token
+    const resetToken = jwt.sign(
+      { phone },
+      SECRETKEY,
+      { expiresIn: "10m" }
+    );
+
+    return res.status(200).json({
+      success: true,
+      resetToken
+    });
+
+  } catch (err) {
+
+    return res.status(500).json({
+      success: false,
+      error: err.message
+    });
+  }
+};
+
+//Finally reset password
+export const resetPassword = async (req, res) => {
+
+  try {
+
+    const { newPassword, resetToken } = req.body;
+
+    if (!newPassword || !resetToken) {
+      return res.status(400).json({
+        message: "All fields required"
+      });
+    }
+
+    const decoded = jwt.verify(
+      resetToken,
+      SECRETKEY
+    );
+
+    const user = await User.findOne({
+      phone: decoded.phone
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        message: "User not found"
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(
+      newPassword,
+      10
+    );
+
+    user.password = hashedPassword;
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset successful"
+    });
+
+  } catch (err) {
 
     return res.status(500).json({
       success: false,

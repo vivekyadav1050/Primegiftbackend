@@ -455,7 +455,7 @@ cron.schedule("0 */12 * * *", async () => {
 
 
 
-cron.schedule("0 * * * *", async () => {
+cron.schedule("0 */12 * * *", async () => {
   try {
     console.log("⏳ Running 12h cleanup...");
 
