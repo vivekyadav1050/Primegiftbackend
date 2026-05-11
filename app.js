@@ -40,6 +40,11 @@ app.use(cors({
   credentials: true
 }));
 
+
+
+
+
+
 app.set("trust proxy", 1);
 
 app.get("/", (req, res) => {
