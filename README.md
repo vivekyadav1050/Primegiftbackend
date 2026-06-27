@@ -1,77 +1,167 @@
-# PrimeGift Backend
+#  PrimeGift Backend
 
-A production-ready backend for **PrimeGift**, a digital gift voucher platform that enables users to purchase, manage, and redeem branded digital gift cards securely.
+> A production-ready backend powering **PrimeGift**, a digital gift voucher platform that enables users to browse, purchase, and manage branded digital gift vouchers securely.
 
-🌐 **Live Website:** https://www.primegift.in
-
----
-
-# Overview
-
-PrimeGift is an online platform developed for secure digital voucher distribution. It allows users to browse available gift vouchers, place orders, complete payments, and manage transactions through a reliable backend system.
-
-The backend is designed using a modular MVC architecture with secure authentication, REST APIs, MongoDB database, and scalable service layers.
+ **Live Website:** https://www.primegift.in
 
 ---
 
-# Features
+#  About PrimeGift
 
-- User Registration & Login
-- JWT Authentication
-- Forgot Password
-- Secure Authorization
-- Product & Category Management
-- Digital Voucher Management
-- Order Management
-- Payment Integration
-- Transaction History
-- User Profile Management
-- Admin APIs
-- Background Jobs
-- Error Handling
-- RESTful API Architecture
+PrimeGift is a full-stack digital voucher platform developed to provide customers with a secure and seamless experience for purchasing branded digital gift cards.
+
+The platform integrates with an **authorized third-party voucher aggregator** through secure REST APIs to fetch and deliver digital vouchers from multiple brands.
+
+PrimeGift focuses on secure authentication, reliable payment processing, order management, transaction tracking, and scalable backend architecture.
 
 ---
 
-# Tech Stack
+#  Key Features
+
+## User Module
+
+* User Registration
+* Secure Login
+* JWT Authentication
+* Forgot Password
+* Profile Management
+* Change Password
+
+---
+
+## Product Module
+
+* Product Listing
+* Product Details
+* Category Management
+* Search Products
+* Offers & Discounts
+
+---
+
+## Voucher Module
+
+* Digital Voucher Purchase
+* Voucher Delivery
+* Voucher Status Tracking
+* Integration with Authorized Third-Party Voucher Aggregator
+
+---
+
+## Order Module
+
+* Create Orders
+* Order Tracking
+* Order History
+* Order Status
+
+---
+
+## Payment Module
+
+* Secure Payment Integration
+* Transaction Verification
+* Payment History
+* Failed Payment Handling
+
+---
+
+## Admin Module
+
+* User Management
+* Product Management
+* Order Management
+* Voucher Management
+* Dashboard APIs
+
+---
+
+## Security
+
+* JWT Authentication
+* Protected Routes
+* Role-Based Authorization
+* Password Encryption
+* Input Validation
+* Middleware-Based Security
+
+---
+
+# 🛠 Tech Stack
+
+## Frontend
+
+* React.js
 
 ## Backend
-- Node.js
-- Express.js
+
+* Node.js
+* Express.js
 
 ## Database
-- MongoDB
-- Mongoose
+
+* MongoDB
+* Mongoose ODM
 
 ## Authentication
-- JWT (JSON Web Token)
+
+* JWT (JSON Web Token)
 
 ## API
-- REST APIs
 
-## Architecture
-- MVC Architecture
-- Middleware Based Request Handling
-- Service Layer Architecture
+* RESTful APIs
+
+## Integrations
+
+* Payment Gateway
+* Authorized Third-Party Voucher Aggregator API
 
 ## Version Control
-- Git
-- GitHub
+
+* Git
+* GitHub
 
 ---
 
-# Project Structure
+# 🏗 Architecture
+
+```
+                React Frontend
+                      │
+               REST API Requests
+                      │
+          Node.js + Express Backend
+                      │
+       ┌──────────────┴──────────────┐
+       │                             │
+ MongoDB Database          Third-Party Services
+                                   │
+                     Voucher Aggregator API
+                                   │
+                          Digital Gift Brands
+```
+
+---
+
+# 📂 Project Structure
 
 ```
 PrimeGiftBackend/
-│
+
 ├── config/
+│
 ├── controllers/
-├── jobs/
+│
 ├── middleware/
+│
 ├── models/
+│
 ├── routes/
+│
 ├── services/
+│
+├── jobs/
+│
 ├── utils/
 │
 ├── app.js
@@ -82,88 +172,138 @@ PrimeGiftBackend/
 
 ---
 
-# Modules
+# 📌 Folder Description
 
-### Authentication
-- User Registration
-- User Login
-- JWT Authentication
-- Forgot Password
+## config
 
-### Product Management
-- Product Listing
-- Categories
-- Product Details
-
-### Order Management
-- Create Orders
-- Order Tracking
-- Order History
-
-### Voucher Management
-- Voucher Generation
-- Voucher Delivery
-- Voucher Status
-
-### Payment
-- Payment Processing
-- Transaction Verification
-- Payment History
-
-### Admin
-- Manage Products
-- Manage Orders
-- Manage Users
-- Dashboard APIs
+Application configuration files including database connection, environment variables, and server configuration.
 
 ---
 
-# Security Features
+## controllers
 
-- JWT Authentication
-- Protected Routes
-- Password Encryption
-- Input Validation
-- Middleware-based Authorization
-- Secure API Design
+Contains API controllers responsible for handling client requests and returning responses.
 
 ---
 
-# REST APIs
+## middleware
 
-Some of the APIs included are:
+Authentication, authorization, validation, and request-processing middleware.
 
-- User Authentication APIs
-- Product APIs
-- Category APIs
-- Order APIs
-- Transaction APIs
-- Voucher APIs
-- Admin APIs
+---
+
+## models
+
+MongoDB models and schemas using Mongoose.
+
+---
+
+## routes
+
+Defines all REST API endpoints.
+
+---
+
+## services
+
+Contains business logic separated from controllers.
+
+---
+
+## jobs
+
+Background scheduled jobs and automated tasks.
+
+---
+
+## utils
+
+Reusable helper functions and utility methods.
+
+---
+
+# 🔐 Security Features
+
+* JWT Authentication
+* Protected APIs
+* Role-Based Access Control
+* Password Hashing
+* Request Validation
+* Secure Middleware
+* Error Handling
+* Environment Variable Protection
+
+---
+
+#  API Modules
+
+* Authentication APIs
+* User APIs
+* Product APIs
+* Category APIs
+* Voucher APIs
+* Order APIs
+* Payment APIs
+* Transaction APIs
+* Admin APIs
+
+---
+
+#  Project Workflow
+
+```
+User Login
+      │
+JWT Authentication
+      │
+Browse Products
+      │
+Select Voucher
+      │
+Payment Processing
+      │
+Voucher Aggregator API
+      │
+Voucher Generated
+      │
+Order Saved
+      │
+Transaction Recorded
+      │
+Voucher Delivered
+```
 
 ---
 
 # Installation
 
-Clone the repository
+## Clone Repository
 
 ```bash
 git clone https://github.com/vivekyadav1050/Primegiftbackend.git
 ```
 
-Move into project
+---
+
+## Move into Project
 
 ```bash
 cd Primegiftbackend
 ```
 
-Install dependencies
+---
+
+## Install Dependencies
 
 ```bash
 npm install
 ```
 
-Create a `.env` file
+---
+
+## Create Environment File
+
+Create a `.env` file.
 
 ```env
 PORT=5000
@@ -171,15 +311,13 @@ PORT=5000
 MONGODB_URI=your_database_url
 
 JWT_SECRET=your_secret_key
+
+PAYMENT_API_KEY=your_payment_key
 ```
 
-Run the project
+---
 
-```bash
-npm start
-```
-
-or
+## Run Development Server
 
 ```bash
 npm run dev
@@ -187,48 +325,67 @@ npm run dev
 
 ---
 
-# Learning Outcomes
+## Production
 
-During the development of this project, I gained practical experience in:
-
-- Backend Development
-- REST API Design
-- JWT Authentication
-- MongoDB Database Design
-- MVC Architecture
-- Error Handling
-- Production Deployment
-- Git & GitHub Workflow
+```bash
+npm start
+```
 
 ---
 
-# Future Improvements
+# 💡 Learning Outcomes
 
-- AI-based Product Recommendation
-- Analytics Dashboard
-- Notification Service
-- Email Automation
-- Admin Reports
-- Microservices Architecture
-- Docker Deployment
+This project helped me gain practical experience in:
+
+* Backend Development
+* Node.js
+* Express.js
+* MongoDB
+* REST API Design
+* JWT Authentication
+* MVC Architecture
+* Middleware Design
+* Production Deployment
+* Git Workflow
+* Secure API Development
+* Third-Party API Integration
+* Payment Workflow
+* Business Logic Implementation
 
 ---
 
-# Live Project
+#  Future Enhancements
+
+* AI-Based Product Recommendation
+* Email Notification System
+* Push Notifications
+* Analytics Dashboard
+* Admin Reporting
+* Docker Deployment
+* CI/CD Pipeline
+* Microservices Migration
+* API Documentation using Swagger
+
+---
+
+#  Live Project
 
 https://www.primegift.in
 
 ---
 
-# Author
+#  Developer
 
 **Vivek Yadav**
 
-GitHub:
+GitHub
+
 https://github.com/vivekyadav1050
 
 ---
 
-## License
+#  License
 
-This project is developed for educational and commercial learning purposes.
+This repository is shared for portfolio and educational purposes.
+
+Unauthorized commercial reuse or redistribution of the source code is prohibited.
